@@ -2,16 +2,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all
 h=0.05;
-xmin=0;
+xmin=-1;
 xmax=1;
-ymin=0;
+ymin=-1;
 ymax=1;
 domain="squareR";
 
 mu=1;
 estabiliza="Si";
-%ejemplo="Cavity";
-ejemplo="Homogeneo";
+ejemplo="Cavity";
+%ejemplo="Homogeneo";
 
 %%
 %PARA CALCULO de ERROR y ORDEN
