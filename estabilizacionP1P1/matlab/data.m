@@ -1,10 +1,10 @@
 %%  problem  data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all
-h=0.05;
-xmin=-1;
+h=0.03;
+xmin=0;
 xmax=1;
-ymin=-1;
+ymin=0;
 ymax=1;
 domain="squareR";
 

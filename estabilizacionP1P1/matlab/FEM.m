@@ -2,7 +2,7 @@
 tic
 disp('----------------------------------------------------------------')
 disp('Programa de Elementos Finitos para el problema de Navier-Stokes')
-disp('Estabilización P1P1 en [-1,1]x[-1,1]')
+disp('Estabilización P1P1 en [0,1]x[0,1]')
 disp('----------------------------------------------------------------')
 disp('----------------------------------------------------------------')
 
@@ -20,13 +20,13 @@ figure(1)
 pdemesh(p,e,t)
 if ejemplo=="Cavity"
     figure(2)
-    subplot(121)
-    pdesurf(nodos',elem',uh(1:nn)), shading interp
-    subplot(122)
+    subplot(2,2,1)
+    pdesurf(nodos',elem',uh(nn+1:2*nn)), shading interp
+    subplot(2,2,2)
     quiver(x,y,uh(1:nn),uh(nn+1:2*nn))
     title("Solucion u_h - Cavity Flow")
-    %subplot(123)
-    %pdesurf(nodos',elem',ph), shading interp
+    subplot(2,2,3)
+    pdesurf(nodos',elem',ph), shading interp
     if estabiliza=="Si"
         title('Presión p_h estabilizada - Cavity Flow')
     else

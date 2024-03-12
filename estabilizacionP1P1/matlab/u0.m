@@ -16,15 +16,15 @@ function u=u0(x,y,coord,ejemplo)
     if coord==1
       for j=1:ly
         if y(j)==1
-          u(j)=g1_eps(x(j),0.05); %1; %para cavity
+          u(j)=1;%g1_eps(x(j),0.1); %1; %para cavity
         end
-        if y(j)==-1
+        if y(j)==0
           u(j)=0; % para cavity
         end
         if x(j)==1
           u(j)=0; % para cavity
         end
-        if x(j)==-1
+        if x(j)==0
           u(j)=0; % para cavity
         end
       end
@@ -33,13 +33,13 @@ function u=u0(x,y,coord,ejemplo)
         if y(j)==1
           u(j)=0; %para cavity
         end
-        if y(j)==-1
+        if y(j)==0
           u(j)=0;  % para cavity
         end
         if x(j)==1
           u(j)=0; % para cavity
         end
-        if x(j)==-1
+        if x(j)==0
           u(j)=0; % para cavity
         end
       end
