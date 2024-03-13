@@ -1,36 +1,3 @@
-#using Delaunay
-#using LinearAlgebra
-#using GLMakie
-#using Plots
-#plotlyjs()
-
-#######FUNCIONES PARA GENERAR LA GEOMETRIA. EJEMPLO: RECTANGULO##############
-#function rect_mesh(xlim,ylim,N,M)
-#    delta_x = (xlim[2] - xlim[1])/N;
-#    delta_y = (ylim[2] - ylim[1])/M;
-#    points=[0 0]
-#    for i in range(0,M)
-#        for j in range(0,N)
-#            points=vcat(points,[xlim[1]+j*delta_x  ylim[1]+i*delta_y]);
-#        end
-#    end
-#    points=points[setdiff(1:end,1),:];
-#    mesh = delaunay(points)
-#    elements=mesh.simplices
-#    nodos=mesh.points
-#
-#    borde=[0]
-#    for i in range(1,size(nodos)[1])
-#        x=nodos[i,1]
-#        y=nodos[i,2]
-#        if x==xlim[1] || x==xlim[2] || y==ylim[1] || y==ylim[2]
-#            borde=vcat(borde,i)
-#        end
-#    end
-#    borde=borde[2:end]
-#    return nodos,elements,borde
-#end
-
 #####FUNCIONES BASES PARA CADA TRIANGULO#########
 function phi(j,X,nodos,elem)
     x=X[1]
@@ -379,5 +346,5 @@ function solver(nodos,borde,elem,mu,w,ejemplo)
     integral_estab=integra_p(nodos,elem,ph)
     ph=ph.-integral_estab #luego habría que dividir por la medida de Omega
     
-    return uh,ph
+    return uh#,ph
 end
