@@ -55,7 +55,7 @@ if ~isempty(s),
 % boundary segment 1
 ii=find(bs==1);
 if length(ii)
-x(ii)=interp1([d(1,1),d(2,1)],[0 1],s(ii));
+x(ii)=interp1([d(1,1),d(2,1)],[-1 1],s(ii));
 y(ii)=interp1([d(1,1),d(2,1)],[1 1],s(ii));
 end
 
@@ -63,21 +63,21 @@ end
 ii=find(bs==2);
 if length(ii)
 x(ii)=interp1([d(1,2),d(2,2)],[1 1],s(ii));
-y(ii)=interp1([d(1,2),d(2,2)],[1 0],s(ii));
+y(ii)=interp1([d(1,2),d(2,2)],[1 -1],s(ii));
 end
 
 % boundary segment 3
 ii=find(bs==3);
 if length(ii)
-x(ii)=interp1([d(1,3),d(2,3)],[1 0],s(ii));
-y(ii)=interp1([d(1,3),d(2,3)],[0 0],s(ii));
+x(ii)=interp1([d(1,3),d(2,3)],[1 -1],s(ii));
+y(ii)=interp1([d(1,3),d(2,3)],[-1 -1],s(ii));
 end
 
 % boundary segment 4
 ii=find(bs==4);
 if length(ii)
-x(ii)=interp1([d(1,4),d(2,4)],[0 0],s(ii));
-y(ii)=interp1([d(1,4),d(2,4)],[0 1],s(ii));
+x(ii)=interp1([d(1,4),d(2,4)],[-1 -1],s(ii));
+y(ii)=interp1([d(1,4),d(2,4)],[-1 1],s(ii));
 end
 
 end

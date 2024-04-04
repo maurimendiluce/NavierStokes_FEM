@@ -18,7 +18,7 @@ function [wh,ph]=solver(w_inicial,elem,nodos,borde,xmin,xmax,ymin,ymax,medidaOme
   uh(NodosD)=u0(nodos(NodosD,1),nodos(NodosD,2),1,ejemplo); %componente 1
   uh(NodosD+nn)=u0(nodos(NodosD,1),nodos(NodosD,2),2,ejemplo); %componente 2
 
-  if estabiliza=="Si"
+  if estabiliza==1
     M=[AC zeros(nn) -Bx';zeros(nn) AC -By'; -Bx -By -G];
   else
     M=[AC zeros(nn) -Bx';zeros(nn) AC -By'; -Bx -By -0*G];
@@ -41,7 +41,7 @@ function [wh,ph]=solver(w_inicial,elem,nodos,borde,xmin,xmax,ymin,ymax,medidaOme
   NPFree=setdiff(1:nn,nodop);
   K_Bx=Bx(NPFree, NodosFree);
   K_By=By(NPFree, NodosFree);
-  if estabiliza=="Si"
+  if estabiliza==1
     K_G=G(NPFree,NPFree);
   else
       K_G=0*G(NPFree,NPFree);
@@ -58,11 +58,11 @@ function [wh,ph]=solver(w_inicial,elem,nodos,borde,xmin,xmax,ymin,ymax,medidaOme
   uh(NodosFree+nn)=wh(cant_NodosFree+1:2*cant_NodosFree);
   ph(NPFree)=wh(2*cant_NodosFree+1:2*cant_NodosFree+nn-1);
 
-  if estabiliza=="No"
+  if estabiliza==0
     integral=integral_p(nodos,elem,ph);
     ph=ph-integral/medidaOmega;
   end
-  if estabiliza=="Si"
+  if estabiliza==1
     integral_estab=integral_pe(nodos,elem,ph);
     ph=ph-integral_estab/medidaOmega;
   end

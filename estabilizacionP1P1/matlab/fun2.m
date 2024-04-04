@@ -8,3 +8,6 @@ function f2=fun2(x,y,mu,ejemplo)
   if ejemplo=="Cavity"
     f2=0;% cavity flow
   end
+  if ejemplo=="Cavity_reg"
+    f2=0;% cavity flow
+  end
