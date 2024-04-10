@@ -51,7 +51,7 @@ function u=u0(x,y,coord,ejemplo)
     if coord==1
       for j=1:ly
         if y(j)==1
-          u(j)=g1_eps(x(j),0.3); %1; %para cavity
+          u(j)=gh(x(j),0.1);%g1_eps(x(j),0.3); %1; %para cavity
         end
         if y(j)==-1
           u(j)=0; % para cavity
