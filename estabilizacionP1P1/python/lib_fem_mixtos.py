@@ -3,29 +3,30 @@ from scipy.spatial import Delaunay
 
 #######FUNCIONES PARA GENERAR LA GEOMETRIA. EJEMPLO: RECTANGULO############## 
 
-def rect_mesh(xlim,ylim,I,J):
-    x = np.linspace(xlim[0],xlim[1],I)
-    y = np.linspace(ylim[0],ylim[1],J)
-    X,Y = np.meshgrid(x,y)
-    P = np.array([X.flatten(),Y.flatten()]).T
-    T = Delaunay(P)
-    elem=np.array(T.simplices)
-    return T,P,elem
+
+#def rect_mesh(xlim,ylim,I,J):
+#    x = np.linspace(xlim[0],xlim[1],I)
+#    y = np.linspace(ylim[0],ylim[1],J)
+#    X,Y = np.meshgrid(x,y)
+#    P = np.array([X.flatten(),Y.flatten()]).T
+#    T = Delaunay(P)
+#    elem=np.array(T.simplices)
+#    return T,P,elem
 
 # Función que encuentra el borde de una triangulación
-def Boundary(T):
-    boundary = np.array([])
-    #boundary = set()
-    for i in range(len(T.neighbors)):
-        for k in range(3):
-            if (T.neighbors[i][k] == -1):
-                nk1,nk2 = (k+1)%3, (k+2)%3 
-                boundary = np.append(boundary,int(T.simplices[i][nk1]))
-                boundary = np.append(boundary,int(T.simplices[i][nk2]))
-    borde=np.array([])
-    for i in range(len(boundary)):
-        borde=np.append(borde,int(boundary[i]))
-    return borde
+#def Boundary(T):
+#    boundary = np.array([])
+#    #boundary = set()
+#    for i in range(len(T.neighbors)):
+#        for k in range(3):
+#            if (T.neighbors[i][k] == -1):
+#                nk1,nk2 = (k+1)%3, (k+2)%3 
+#                boundary = np.append(boundary,int(T.simplices[i][nk1]))
+#                boundary = np.append(boundary,int(T.simplices[i][nk2]))
+#    borde=np.array([])
+#    for i in range(len(boundary)):
+#        borde=np.append(borde,int(boundary[i]))
+#    return borde
 
 #####FUNCIONES BASES PARA CADA TRIANGULO#########
 
@@ -259,21 +260,21 @@ def u0_cavity(X,componente):
                 u[j]=1
             if X[:,1][j]==0:
                 u[j]=0
-            if X[:,0][j]==1:
+            if X[:,0][j]==0:
                 u[j]=0
             if X[:,0][j]==0:
                 u[j]=0
         return u
     else:
-        for j in range(l):
-            if X[:,1][j]==1:
-                u[j]=0
-            if X[:,1][j]==0:
-                u[j]=0
-            if X[:,0][j]==1:
-                u[j]=0
-            if X[:,0][j]==0:
-                u[j]=0
+        #for j in range(l):
+        #    if X[:,1][j]==1:
+        #        u[j]=0
+        #    if X[:,1][j]==0:
+        #        u[j]=0
+        #    if X[:,0][j]==1:
+        #        u[j]=0
+        #    if X[:,0][j]==0:
+        #        u[j]=0
         return u
 
 def integra_p(T,nodos,elem,ph):
