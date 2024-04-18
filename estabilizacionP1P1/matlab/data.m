@@ -9,7 +9,7 @@ ymax=1;
 domain="squareR";
 
 mu=1;
-estabiliza="Si";
+estabiliza=1;
 ejemplo="Cavity";
 %ejemplo="Homogeneo";
 
