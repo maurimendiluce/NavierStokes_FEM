@@ -103,7 +103,7 @@ classdef fem
           q=(a1+a2+a3)*abs(delta)/6;
         end
     
-        function q=integraf1(fem,j,x1,y1,x2,y2,x3,y3) %integral f1
+        function q=integraf1(fem,fun_data,j,x1,y1,x2,y2,x3,y3) %integral f1
           if j==1
               delta=(x2-x3)*(y1-y3)+(y3-y2)*(x1-x3);
           end
@@ -113,13 +113,13 @@ classdef fem
           if j==3
               delta=(x2-x1)*(y3-y1)+(y1-y2)*(x3-x1);
           end
-          a1=fem.f1((x1+x3)/2,(y1+y3)/2)*fem.phi(j,(x1+x3)/2,(y1+y3)/2,x1,y1,x2,y2,x3,y3);
-          a2=fem.f1((x1+x2)/2,(y1+y2)/2)*fem.phi(j,(x1+x2)/2,(y1+y2)/2,x1,y1,x2,y2,x3,y3);
-          a3=fem.f1((x2+x3)/2,(y2+y3)/2)*fem.phi(j,(x2+x3)/2,(y2+y3)/2,x1,y1,x2,y2,x3,y3);
+          a1=fun_data.f1((x1+x3)/2,(y1+y3)/2)*fem.phi(j,(x1+x3)/2,(y1+y3)/2,x1,y1,x2,y2,x3,y3);
+          a2=fun_data.f1((x1+x2)/2,(y1+y2)/2)*fem.phi(j,(x1+x2)/2,(y1+y2)/2,x1,y1,x2,y2,x3,y3);
+          a3=fun_data.f1((x2+x3)/2,(y2+y3)/2)*fem.phi(j,(x2+x3)/2,(y2+y3)/2,x1,y1,x2,y2,x3,y3);
           q=(a1+a2+a3)*abs(delta)/6;
         end
  
-        function q=integraf2(fem,j,x1,y1,x2,y2,x3,y3) %integral f2
+        function q=integraf2(fem,fun_data,j,x1,y1,x2,y2,x3,y3) %integral f2
           if j==1
               delta=(x2-x3)*(y1-y3)+(y3-y2)*(x1-x3);
           end
@@ -129,9 +129,9 @@ classdef fem
           if j==3
               delta=(x2-x1)*(y3-y1)+(y1-y2)*(x3-x1);
           end
-          a1=fem.f2((x1+x3)/2,(y1+y3)/2)*fem.phi(j,(x1+x3)/2,(y1+y3)/2,x1,y1,x2,y2,x3,y3);
-          a2=fem.f2((x1+x2)/2,(y1+y2)/2)*fem.phi(j,(x1+x2)/2,(y1+y2)/2,x1,y1,x2,y2,x3,y3);
-          a3=fem.f2((x2+x3)/2,(y2+y3)/2)*fem.phi(j,(x2+x3)/2,(y2+y3)/2,x1,y1,x2,y2,x3,y3);
+          a1=fun_data.f2((x1+x3)/2,(y1+y3)/2)*fem.phi(j,(x1+x3)/2,(y1+y3)/2,x1,y1,x2,y2,x3,y3);
+          a2=fun_data.f2((x1+x2)/2,(y1+y2)/2)*fem.phi(j,(x1+x2)/2,(y1+y2)/2,x1,y1,x2,y2,x3,y3);
+          a3=fun_data.f2((x2+x3)/2,(y2+y3)/2)*fem.phi(j,(x2+x3)/2,(y2+y3)/2,x1,y1,x2,y2,x3,y3);
           q=(a1+a2+a3)*abs(delta)/6;
         end
    
@@ -151,24 +151,25 @@ classdef fem
           y12=(y1+y2)/2;
           x23=(x2+x3)/2;
           y23=(y2+y3)/2;
-          proy=1/3;
-          a1=(fem.phi(i,x13,y13,u1,v1,u2,v2,u3,v3)-proy)*(fem.phi(j,x13,y13,x1,y1,x2,y2,x3,y3)-proy);
-          a2=(fem.phi(i,x12,y12,u1,v1,u2,v2,u3,v3)-proy)*(fem.phi(j,x12,y12,x1,y1,x2,y2,x3,y3)-proy);
-          a3=(fem.phi(i,x23,y23,u1,v1,u2,v2,u3,v3)-proy)*(fem.phi(j,x23,y23,x1,y1,x2,y2,x3,y3)-proy);
+          proy_i = (1/3)*(fem.phi(i,x13,y13,u1,v1,u2,v2,u3,v3)+fem.phi(i,x12,y12,u1,v1,u2,v2,u3,v3)+fem.phi(i,x23,y23,u1,v1,u2,v2,u3,v3));
+          proy_j = (1/3)*(fem.phi(j,x13,y13,x1,y1,x2,y2,x3,y3)+fem.phi(j,x12,y12,x1,y1,x2,y2,x3,y3)+fem.phi(j,x23,y23,x1,y1,x2,y2,x3,y3));
+          a1=(fem.phi(i,x13,y13,u1,v1,u2,v2,u3,v3)-proy_i)*(fem.phi(j,x13,y13,x1,y1,x2,y2,x3,y3)-proy_j);
+          a2=(fem.phi(i,x12,y12,u1,v1,u2,v2,u3,v3)-proy_i)*(fem.phi(j,x12,y12,x1,y1,x2,y2,x3,y3)-proy_j);
+          a3=(fem.phi(i,x23,y23,u1,v1,u2,v2,u3,v3)-proy_i)*(fem.phi(j,x23,y23,x1,y1,x2,y2,x3,y3)-proy_j);
           q=(a1+a2+a3)*abs(delta)/6;
         end
 
         function int=integral_p(mesh,fem,ph)
           int=0;
-          ntr=size(mesh.triang,1);
+          ntr=size(mesh.elem,1);
           for i=1:ntr
-            vert_elem=mesh.triang(i,1:3);
-            x1=mesh.points(vert_elem(1),1);
-            y1=mesh.points(vert_elem(1),2);
-            x2=mesh.points(vert_elem(2),1);
-            y2=mesh.points(vert_elem(2),2);
-            x3=mesh.points(vert_elem(3),1);
-            y3=mesh.points(vert_elem(3),2);
+            vert_elem=mesh.elem(i,1:3);
+            x1=mesh.nodes(vert_elem(1),1);
+            y1=mesh.nodes(vert_elem(1),2);
+            x2=mesh.nodes(vert_elem(2),1);
+            y2=mesh.nodes(vert_elem(2),2);
+            x3=mesh.nodes(vert_elem(3),1);
+            y3=mesh.nodes(vert_elem(3),2);
         
             int= int + ph(vert_elem(1))*fem.integra_phi(fem,1,x1,y1,x2,y2,x3,y3)+ph(vert_elem(2))*fem.integra_phi(fem,2,x1,y1,x2,y2,x3,y3)+...
                       ph(vert_elem(3))*fem.integra_phi(fem,3,x1,y1,x2,y2,x3,y3);
@@ -211,7 +212,7 @@ classdef fem
         
           tol=sqrt(int);
         end
-    
+        
         
     end
 end

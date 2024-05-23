@@ -1,4 +1,4 @@
-function [b1,b2]=LoadVector(mesh,fem,vert_elem)
+function [b1,b2]=LoadVector(mesh,fem,fun_data,vert_elem)
     
     b1 = zeros(3,1);
     b2 = zeros(3,1);
@@ -9,11 +9,11 @@ function [b1,b2]=LoadVector(mesh,fem,vert_elem)
     x3=mesh.nodes(vert_elem(3),1);
     y3=mesh.nodes(vert_elem(3),2);
 
-    b1(1)=fem.integraf1(fem,1,x1,y1,x2,y2,x3,y3);
-    b1(2)=fem.integraf1(fem,2,x1,y1,x2,y2,x3,y3);
-    b1(3)=fem.integraf1(fem,3,x1,y1,x2,y2,x3,y3);
-    b2(1)=fem.integraf2(fem,1,x1,y1,x2,y2,x3,y3);
-    b2(2)=fem.integraf2(fem,2,x1,y1,x2,y2,x3,y3);
-    b2(3)=fem.integraf2(fem,3,x1,y1,x2,y2,x3,y3);
+    b1(1)=fem.integraf1(fem,fun_data,1,x1,y1,x2,y2,x3,y3);
+    b1(2)=fem.integraf1(fem,fun_data,2,x1,y1,x2,y2,x3,y3);
+    b1(3)=fem.integraf1(fem,fun_data,3,x1,y1,x2,y2,x3,y3);
+    b2(1)=fem.integraf2(fem,fun_data,1,x1,y1,x2,y2,x3,y3);
+    b2(2)=fem.integraf2(fem,fun_data,2,x1,y1,x2,y2,x3,y3);
+    b2(3)=fem.integraf2(fem,fun_data,3,x1,y1,x2,y2,x3,y3);
 
 end

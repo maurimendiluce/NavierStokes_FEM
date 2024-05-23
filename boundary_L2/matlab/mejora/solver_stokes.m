@@ -1,4 +1,4 @@
-function [uh,ph]=solver(u_old,data,mesh,fem)
+function [uh,ph]=solver_stokes(data,mesh,fem)
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   nn = size(mesh.nodes,1); % numero de nodos
@@ -8,36 +8,39 @@ function [uh,ph]=solver(u_old,data,mesh,fem)
   ph=zeros(nn,1);
 
   % Nodos del borde con Cond. de Dirichlet
-  D=mesh.dirich_square(data,mesh);
-  NodesD = unique(D);
+  NodesD=fun_data.dirich_square(data,mesh);
+  
   % Nodos libres
   NodesFree=setdiff(1:nn,NodesD);
 
   A = sparse(nn,nn);
   Bx = sparse(nn,nn);
   By = sparse(nn,nn);
-  C = sparse(nn,nn);
-  G = spare(nn,nn);
+  %C = sparse(nn,nn);
+  G = sparse(nn,nn);
   b1 = zeros(nn,1);
   b2 = zeros(nn,1);
     
   for el=1:nt
 
-      vert_elem = mesh.elem(el,:);
-
-      A = A+assamble_laplacian_operator(mesh,fem,vert_elem);
+      vert_elem = mesh.elem(el,1:3);
+        
+      M_A = assamble_laplacian_operator(mesh,fem,vert_elem);
+      A(vert_elem,vert_elem) = A(vert_elem,vert_elem)+M_A;
       
       [Bx_aux,By_aux] = assamble_div_operator(mesh,fem,vert_elem);
 
-      Bx = Bx + Bx_aux;
-      By = By + By_aux;
+      Bx(vert_elem,vert_elem) = Bx(vert_elem,vert_elem) + Bx_aux;
+      By(vert_elem,vert_elem) = By(vert_elem,vert_elem) + By_aux;
 
-      G = G + assamble_estab_operator(mesh,fem,vert_elem);
+      M_G = assamble_estab_operator(mesh,fem,vert_elem);
+     
+      G(vert_elem,vert_elem) = G(vert_elem,vert_elem) + M_G;
       
-      [b1_aux,b2_aux] = LoadVector(mesh,fem,vert_elem);
+      [b1_aux,b2_aux] = LoadVector(mesh,fem,fun_data,vert_elem);
 
-      b1 = b1 + b1_aux;
-      b2 = b2 + b2_aux;
+      b1(vert_elem) = b1(vert_elem) + b1_aux;
+      b2(vert_elem) = b2(vert_elem) + b2_aux;
 
       
   end
@@ -45,8 +48,8 @@ function [uh,ph]=solver(u_old,data,mesh,fem)
   A = data.mu*A;
 
   % Cond. de Dirichlet no homogenea -  u0 dato Dirichlet
-  uh(NodesD)=fem.u0(mesh.nodes(NodesD,1),mesh.nodes(NodesD,2),1,data); %componente 1
-  uh(NodesD+nn)=fem.u0(mesh.nodes(NodesD,1),mesh.nodes(NodesD,2),2,data); %componente 2
+  uh(NodesD)=fun_data.u0(mesh.nodes(NodesD,1),mesh.nodes(NodesD,2),1,data); %componente 1
+  uh(NodesD+nn)=fun_data.u0(mesh.nodes(NodesD,1),mesh.nodes(NodesD,2),2,data); %componente 2
         
   M=[A zeros(nn) -Bx';zeros(nn) A -By'; -Bx -By -G];
   b=[b1;b2;zeros(nn,1)];
@@ -57,7 +60,7 @@ function [uh,ph]=solver(u_old,data,mesh,fem)
   b=b-M*[uh;ph];  
   K_A1=[A(NodesFree,NodesFree) zeros(size(NodesFree,2))];
   K_A2=[zeros(size(NodesFree,2)) A(NodesFree, NodesFree)];
-  NPFree=setdiff(1:nn,nodop);
+  NPFree=setdiff(1:nn,nodep);
   K_Bx=Bx(NPFree, NodesFree);
   K_By=By(NPFree, NodesFree);
   K_G=G(NPFree,NPFree);

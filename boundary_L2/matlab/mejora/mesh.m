@@ -7,6 +7,6 @@ classdef mesh
         dirichlet
     end
 
-    methods
+    methods (Static)
     end
 end

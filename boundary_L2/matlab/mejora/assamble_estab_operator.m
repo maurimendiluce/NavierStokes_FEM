@@ -1,4 +1,4 @@
-function assamble_estab_operator(mesh,fem,vert_elem)
+function G=assamble_estab_operator(mesh,fem,vert_elem)
 
     x1=mesh.nodes(vert_elem(1),1);
     y1=mesh.nodes(vert_elem(1),2);
