@@ -1,62 +1,73 @@
 cout << "\n";
 cout << "  Navier-Stokes Problem:\n";
-cout << "  FreeFem++ version.\n";
 cout << "  Solve for steady Navier Stokes flow in a cavity.\n";
 
 include "ffmatlib.idp"
-//Parametros
-int n = 25;
+load "iovtk"
+//Resuelvo en una malla Th1
+
+//Parametro
+int n1 = 32;
+int n2 = 2*n1;
 real nu = 1;
 real tol = 1e-9;
-real epsln = 1e-10;
-real delta = 1.;
-
 //Malla
-border a(t=0,1.0){x=t; y=0; label=1;};
-border b(t=0,1.0){x=1; y=t; label=2;};
-border c(t=1.0,0){x=t; y=1; label=3;};
-border d(t=1.0,0){x=0; y=t; label=4;};
-mesh Th = buildmesh (a(n) + b(n) + c(n) +d(n));
-plot(Th, wait=1);
-
+//border a1(t=0,1.0){x=t; y=0; label=1;};
+//border b1(t=0,1.0){x=1; y=t; label=2;};
+//border c1(t=1.0,0){x=t; y=1; label=3;};
+//border d1(t=1.0,0){x=0; y=t; label=4;};
+//mesh Th1 = buildmesh (a1(n1) + b1(n1) + c1(n1) +d1(n1));
+mesh Th1 = square(n1,n1);
+//plot(Th, wait=1);
 
 //Fespace
-fespace Vh(Th, [P2, P2]);
-Vh [ux, uy], [vx, vy], [ux1, uy1], [dux, duy];
+fespace Vh1(Th1,P1b);
+Vh1 u1o, u2o, v1, v2, u1, u2, du1, du2;
 
-fespace Qh(Th, P1);
-Qh p, q, dp;
+fespace Qh1(Th1, P1);
+Qh1 p, q, dp;
+
+fespace Xh(Th1,P0); 
+Xh h1 = hTriangle;
+
+real hmax1 = h1[].max;
 
 
-fespace Ph(Th,P0);
-Ph pp, qq;
 
-fespace Vh0(Th,P0); 
-Vh0 h = hTriangle;
+//Datos dirichlet
+func g = 1; 
+//func real g1(real x){
+//  if(x<hmax1){
+//    return x/hmax1;
+//  }
+//  if (hmax1<x<1-hmax1){
+//    return 1;
+//  }
+//  if(x>1-hmax1){
+//    return (1-x)/hmax1;
+//  }
+//} 
 
-real hmax = h[].max;
-
-func g = 1;
-
+//func gh1 = g1(x);
 
 //Macro
 macro Gradient(u) [dx(u), dy(u)] //
-macro Divergence(ux, uy) (dx(ux) + dy(uy)) //
-macro UgradV(ux,uy,vx,vy) [ [ux,uy]'*[dx(vx),dy(vx)] , [ux,uy]'*[dx(vy),dy(vy)] ]//
+macro Divergence(u1, u2) (dx(u1) + dy(u2)) //
+macro UgradV(u1,u2,v1,v2) [ [u1,u2]'*[dx(v1),dy(v1)] , [u1,u2]'*[dx(v2),dy(v2)] ]//
 
-macro NS() {
+macro NS1() {
  int k;
  real err=0;
- Stokes;
+ Stokes1;
 /* Newton Loop  */
  for(k=0; k< 15; k++) {
-   LinNS;
-   dux[] = ux1[] - ux[];
-   duy[] = uy1[] - uy[];
-   err = sqrt(int2d(Th)(Gradient(dux)'*Gradient(dux)+Gradient(duy)'*Gradient(duy))) /
-     sqrt(int2d(Th)(Gradient(ux)'*Gradient(ux) + Gradient(uy)'*Gradient(uy)));
-   ux[] = ux1[];
-   uy[] = uy1[];
+   LinNS1;
+   du1[] = u1[] - u1o[];
+   du2[] = u2[] - u2o[];
+   err = sqrt(int2d(Th1)(Gradient(du1)'*Gradient(du1)+Gradient(du2)'*Gradient(du2))) /
+     sqrt(int2d(Th1)(Gradient(u1o)'*Gradient(u1o) + Gradient(u2o)'*Gradient(u2o)));
+   u1o[] = u1[];
+   u2o[] = u2[];
    cout << "error = " << err << " / " << "tol = " << tol << endl;
    cout.flush;
    if(err < tol) break;
@@ -68,41 +79,149 @@ macro NS() {
 
 } //
 
-//Problem
-problem Stokes ([ux, uy, p],[vx, vy, q])
-	= int2d(Th)(nu * (Gradient(ux)' * Gradient(vx)
-		+ Gradient(uy)' * Gradient(vy))
-		- p * Divergence(vx, vy)
-		- Divergence(ux, uy) * q)
-     +on(1,2,3,4,uy=0.)
-     +on(1,2,4, ux=0)
-     +on(3, ux=g);
+//Problemas 
+problem Stokes1 ([u1o, u2o, p],[v1, v2, q])
+	= int2d(Th1)(nu * (Gradient(u1o)' * Gradient(v1)
+		+ Gradient(u2o)' * Gradient(v2))
+		- p * Divergence(v1, v2)
+		- Divergence(u1o, u2o) * q)
+     +on(1,2,3,4,u2o=0.)
+     +on(1,2,4, u1o=0)
+     +on(3, u1o=g);
 
-problem LinNS([ux1,uy1,dp],[vx,vy,q]) =
-     int2d(Th)(nu*(Gradient(ux1)'*Gradient(vx)
-               +   Gradient(uy1)'*Gradient(vy))
-	       + UgradV(ux1,uy1, ux, uy)'*[vx,vy]
-	       + UgradV(ux,uy,ux1,uy1)'*[vx,vy]
-	       + Divergence(ux1,uy1)*q + Divergence(vx,vy)*dp)
-     -int2d(Th)(UgradV(ux,uy, ux, uy)'*[vx,vy])
-     +on(1,2,3,4,uy1=0.)
-     +on(1,2,4, ux1=0)
-     +on(3, ux1=g);
+problem LinNS1([u1,u2,dp],[v1,v2,q]) =
+     int2d(Th1)(nu*(Gradient(u1)'*Gradient(v1)
+               +   Gradient(u2)'*Gradient(v2))
+	       + UgradV(u1,u2, u1o, u2o)'*[v1,v2]
+	       + UgradV(u1o,u2o,u1,u2)'*[v1,v2]
+	       - Divergence(u1,u2)*q - Divergence(v1,v2)*dp)
+     -int2d(Th1)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])
+     +on(1,2,3,4,u2=0.)
+     +on(1,2,4, u1=0)
+     +on(3, u1=g);
 
-NS;
+NS1;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Resuelvo en una malla Th2
+
+//Malla
+//border a2(t=0,1.0){x=t; y=0; label=1;};
+//border b2(t=0,1.0){x=1; y=t; label=2;};
+//border c2(t=1.0,0){x=t; y=1; label=3;};
+//border d2(t=1.0,0){x=0; y=t; label=4;};
+//mesh Th2 = buildmesh (a2(n2) + b2(n2) + c2(n2) +d2(n2));
+mesh Th2 = square(n2,n2);
+//plot(Th, wait=1);
+
+//Fespace
+fespace Vh2(Th2,P1b);
+Vh2 uu1o, uu2o, vv1, vv2, uu1, uu2, duu1, duu2;
+
+fespace Qh2(Th2, P1);
+Qh2 pp, qq, dpp;
+
+fespace Xh2(Th2,P0); 
+Xh2 h2 = hTriangle;
+
+real hmax2 = h2[].max;
+
+//Datos dirichlet
+//func g = 1; 
+//func real g2(real x){
+//  if(x<hmax2){
+//    return x/hmax2;
+//  }
+//  if (hmax2<x<1-hmax2){
+//    return 1;
+//  }
+//  if(x>1-hmax2){
+//    return (1-x)/hmax2;
+//  }
+//} 
+
+//func gh2 = g2(x);
+
+
+macro NS2() {
+ int j;
+ real err=0;
+ Stokes2;
+/* Newton Loop  */
+ for(j=0; j< 15; j++) {
+   LinNS2;
+   duu1[] = uu1[] - uu1o[];
+   duu2[] = uu2[] - uu2o[];
+   err = sqrt(int2d(Th2)(Gradient(duu1)'*Gradient(duu1)+Gradient(duu2)'*Gradient(duu2))) /
+     sqrt(int2d(Th2)(Gradient(uu1o)'*Gradient(uu1o) + Gradient(uu2o)'*Gradient(uu2o)));
+   uu1o[] = uu1[];
+   uu2o[] = uu2[];
+   cout << "error = " << err << " / " << "tol = " << tol << endl;
+   cout.flush;
+   if(err < tol) break;
+ }
+ /* Newton loop has not converged */
+ if(err > tol) {
+   cout << "NS Warning : non convergence : err = " << err << " / eps = " << tol << endl;
+ }
+
+} //
+
+//Problemas 
+problem Stokes2 ([uu1o, uu2o, pp],[vv1, vv2, qq])
+	= int2d(Th2)(nu * (Gradient(uu1o)' * Gradient(vv1)
+		+ Gradient(uu2o)' * Gradient(vv2))
+		- pp * Divergence(vv1, vv2)
+		- Divergence(uu1o, uu2o) * qq)
+     +on(1,2,3,4,uu2o=0.)
+     +on(1,2,4, uu1o=0)
+     +on(3, uu1o=g);
+
+problem LinNS2([uu1,uu2,dpp],[vv1,vv2,qq]) =
+     int2d(Th2)(nu*(Gradient(uu1)'*Gradient(vv1)
+               +   Gradient(uu2)'*Gradient(vv2))
+	       + UgradV(uu1,uu2, uu1o, uu2o)'*[vv1,vv2]
+	       + UgradV(uu1o,uu2o,uu1,uu2)'*[vv1,vv2]
+	       - Divergence(uu1,uu2)*qq - Divergence(vv1,vv2)*dpp)
+     -int2d(Th2)(UgradV(uu1o,uu2o, uu1o, uu2o)'*[vv1,vv2])
+     +on(1,2,3,4,uu2=0.)
+     +on(1,2,4, uu1=0)
+     +on(3, uu1=g);
+
+NS2;
+
+real errorL4=0;
+errorL4 = sqrt(sqrt(int2d(Th2)(u1-uu1)^4));
+
+
+cout << endl;
+cout << "Resultados:" << endl;
+cout << "--------------------------" << endl;
+cout << "errorL4: " << errorL4 << endl;
+cout << "h_max: " << hmax2 << endl;
+
+cout << endl;
+cout << "NbBoundaryElements:\t" <<  Th2.nbe << endl;
+cout << "NbTriangles:\t\t" <<  Th2.nt << endl;
+cout << "NbVertices:\t\t" <<  Th2.nv << endl;
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//Visualizacion
 
 //Save mesh
-//savemesh(Th,"mesh_square.msh");
+savemesh(Th1,"mesh_square.msh");
 //Save finite element space connectivity
-//ffSaveVh(Th,Vh,"espacio_Vh.txt");
+ffSaveVh(Th1,Vh1,"espacio_Vh.txt");
+ffSaveVh(Th1,Qh1,"espacio_Qh.txt");
 //Save some scalar data
-//ffSaveData(p,"presion.txt");
+ffSaveData(dp,"presion.txt");
 //Save a 2D vector field
-//ffSaveData2(ux,uy,"velocidad.txt");
+ffSaveData2(u1,u2,"solucion.txt");
 
-//cout << ux[].n << endl;
-//cout << p[].n << endl;
+//Plots
+plot(dpp, wait=1, value=1, fill=1);//, ps="pressure.ps", wait=1, value=1, fill=1);
+plot([uu1, uu2], value=1);//, ps="velocity.ps", value=1, coef=.05);
 
-//Plot
-plot(p, wait=1, value=1, fill=1);//, ps="pressure.ps", wait=1, value=1, fill=1);
-plot([ux, uy], value=1);//, ps="velocity.ps", value=1, coef=.05);
+savevtk("sol.vtk", Th2, [uu1,uu2],dpp,dataname="solucion");
