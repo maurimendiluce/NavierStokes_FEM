@@ -1,0 +1,6 @@
+//Macros
+
+macro Gradient(u) [dx(u), dy(u)] //
+macro Divergence(u1, u2) (dx(u1) + dy(u2)) //
+macro UgradV(u1,u2,v1,v2) [ [u1,u2]'*[dx(v1),dy(v1)] , [u1,u2]'*[dx(v2),dy(v2)] ]//
+

@@ -1,0 +1,84 @@
+//Parametros
+int n = 40;
+real nu = 1;
+real tol = 1e-9;
+
+//Malla
+border a1(t=0,1.0){x=t; y=0; label=1;};
+border b1(t=0,1.0){x=1; y=t; label=2;};
+border c1(t=1.0,0){x=t; y=1; label=3;};
+border d1(t=1.0,0){x=0; y=t; label=4;};
+mesh Th = buildmesh (a1(n) + b1(n) + c1(n) +d1(n));
+//mesh Th = square(n,n);
+
+//Fespace
+fespace Vh(Th,P1);
+Vh u1o, u2o, v1, v2, u1, u2, du1, du2;
+
+fespace Qh(Th, P1);
+Qh p, q, dp, psi,phi;;
+
+func g = 1; 
+
+//Macro
+macro a(u1,u2,v1,v2) (dx(u1)*dx(v1) + dy(u1)*dy(v1) + dx(u2)*dx(v2) + dy(u2)*dy(v2)) //
+macro Gradient(u) [dx(u),dy(u)] //
+macro div(u1,u2) (dx(u1) + dy(u2)) //
+macro UgradV(u1,u2,v1,v2) [ [u1,u2]'*[dx(v1),dy(v1)] , [u1,u2]'*[dx(v2),dy(v2)] ]//
+
+macro NS() {
+ int k;
+ real err=0;
+ Stokes;
+/* Newton Loop  */
+ for(k=0; k< 15; k++) {
+   LinNS;
+   du1[] = u1[] - u1o[];
+   du2[] = u2[] - u2o[];
+   err = sqrt(int2d(Th)(Gradient(du1)'*Gradient(du1)+Gradient(du2)'*Gradient(du2))) /
+     sqrt(int2d(Th)(Gradient(u1o)'*Gradient(u1o) + Gradient(u2o)'*Gradient(u2o)));
+   u1o[] = u1[];
+   u2o[] = u2[];
+   cout << "error = " << err << " / " << "tol = " << tol << endl;
+   cout.flush;
+   if(err < tol) break;
+ }
+ /* Newton loop has not converged */
+ if(err > tol) {
+   cout << "NS Warning : non convergence : err = " << err << " / eps = " << tol << endl;
+ }
+
+} //
+
+//Problemas 
+problem Stokes ([u1o, u2o, p],[v1, v2, q])
+    = int2d(Th)(
+        a(u1o,u2o,v1,v2)
+        - div(v1,v2)*p
+        + q*(div(u1o,u2o)))-int2d(Th,qforder=2)(p*q)
+        + int2d(Th)(p*q) 
+     +on(1,2,4, u1o=0, u2o=0)
+     +on(3, u1o=g, u2o=0);
+
+problem LinNS([u1,u2,dp],[v1,v2,q]) = 
+     int2d(Th)(nu*a(u1,u2,v1,v2)
+	       + UgradV(u1,u2, u1o, u2o)'*[v1,v2]
+	       + UgradV(u1o,u2o,u1,u2)'*[v1,v2]
+	       + div(u1,u2)*q - div(v1,v2)*dp)
+        -int2d(Th)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])-int2d(Th,qforder=2)(dp*q)
+        + int2d(Th)(dp*q)
+     +on(1,2,4, u1=0, u2=0)
+     +on(3, u1=g, u2=0);
+
+NS;
+
+
+plot([u1,u2],dp,wait=1);
+
+problem streamlines(psi,phi,solver=UMFPACK) =
+      int2d(Th)( dx(psi)*dx(phi) + dy(psi)*dy(phi))
+   +  int2d(Th)( -phi*(dy(u1)-dx(u2)))
+   +  on(1,2,3,4,psi=0);
+
+streamlines;
+plot(psi,wait=1);

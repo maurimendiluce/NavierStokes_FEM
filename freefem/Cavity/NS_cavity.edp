@@ -9,7 +9,7 @@ load "iovtk"
 //Parametro
 int n1 = 32;
 int n2 = 2*n1;
-real nu = 1;
+real nu = 0.1;
 real tol = 1e-9;
 //Malla
 //border a1(t=0,1.0){x=t; y=0; label=1;};
@@ -21,7 +21,7 @@ mesh Th1 = square(n1,n1);
 //plot(Th, wait=1);
 
 //Fespace
-fespace Vh1(Th1,P1b);
+fespace Vh1(Th1,P2);
 Vh1 u1o, u2o, v1, v2, u1, u2, du1, du2;
 
 fespace Qh1(Th1, P1);
@@ -116,7 +116,7 @@ mesh Th2 = square(n2,n2);
 //plot(Th, wait=1);
 
 //Fespace
-fespace Vh2(Th2,P1b);
+fespace Vh2(Th2,P2);
 Vh2 uu1o, uu2o, vv1, vv2, uu1, uu2, duu1, duu2;
 
 fespace Qh2(Th2, P1);
@@ -126,22 +126,6 @@ fespace Xh2(Th2,P0);
 Xh2 h2 = hTriangle;
 
 real hmax2 = h2[].max;
-
-//Datos dirichlet
-//func g = 1; 
-//func real g2(real x){
-//  if(x<hmax2){
-//    return x/hmax2;
-//  }
-//  if (hmax2<x<1-hmax2){
-//    return 1;
-//  }
-//  if(x>1-hmax2){
-//    return (1-x)/hmax2;
-//  }
-//} 
-
-//func gh2 = g2(x);
 
 
 macro NS2() {
@@ -224,4 +208,4 @@ ffSaveData2(u1,u2,"solucion.txt");
 plot(dpp, wait=1, value=1, fill=1);//, ps="pressure.ps", wait=1, value=1, fill=1);
 plot([uu1, uu2], value=1);//, ps="velocity.ps", value=1, coef=.05);
 
-savevtk("sol.vtk", Th2, [uu1,uu2],dpp,dataname="solucion");
+//savevtk("sol.vtk", Th2, [uu1,uu2],dpp,dataname="solucion");

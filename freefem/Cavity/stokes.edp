@@ -1,0 +1,32 @@
+// Parameters
+int nn = 40;
+real nu=0.001;
+
+// Mesh
+mesh Th = square(nn, nn);
+
+// Fespace
+fespace Uh(Th, P1);
+Uh u, v;
+Uh uu, vv;
+
+fespace Ph(Th, P1);
+Ph p, pp;
+
+// Problem
+solve stokes ([u, v, p], [uu, vv, pp])
+    = int2d(Th)(
+        nu* (dx(u)*dx(uu)
+        + dy(u)*dy(uu)
+        + dx(v)*dx(vv)
+        + dy(v)*dy(vv))
+        + dx(p)*uu
+        + dy(p)*vv
+        + pp*(dx(u) + dy(v)))-int2d(Th,qforder=2)(p*pp)
+        + int2d(Th)(p*pp)
+    + on(1, 2, 4, u=0, v=0)
+    + on(3, u=1, v=0)
+    ;
+
+// Plot
+plot([u,v],p, wait=1);
