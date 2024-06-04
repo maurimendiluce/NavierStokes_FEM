@@ -1,17 +1,37 @@
 // Parameters
 int nn = 40;
-real nu=0.001;
+real nu=1;
 
 // Mesh
-mesh Th = square(nn, nn);
+real x0 = -1;
+real x1 = 1;
+real y0 = -1;
+real y1 = 1;
+mesh Th = square(nn, nn, [x0+(x1-x0)*x, y0+(y1-y0)*y]);
 
 // Fespace
 fespace Uh(Th, P1);
 Uh u, v;
 Uh uu, vv;
 
+real h=0.025;
+
+func real gh(real x){
+    if(-1<=x && x<-1+h){
+        return (x+1)/h;
+    }
+    if(-1+h<=x && x<=1-h){
+        return 1;
+    }
+    if(1-h<x && x<=1){
+        return (1-x)/h;
+    }
+}
+
 fespace Ph(Th, P1);
 Ph p, pp;
+Ph g = gh(x);
+
 
 // Problem
 solve stokes ([u, v, p], [uu, vv, pp])
@@ -25,8 +45,10 @@ solve stokes ([u, v, p], [uu, vv, pp])
         + pp*(dx(u) + dy(v)))-int2d(Th,qforder=2)(p*pp)
         + int2d(Th)(p*pp)
     + on(1, 2, 4, u=0, v=0)
-    + on(3, u=1, v=0)
+    + on(3, u=g, v=0)
     ;
 
+cout << "h: " << h << endl;
 // Plot
-plot([u,v],p, wait=1);
+//plot([u,v],p, wait=1);
+plot(p);
