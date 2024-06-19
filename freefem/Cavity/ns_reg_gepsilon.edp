@@ -47,11 +47,11 @@ func real gh(real x){
 //Fespace
 fespace Vh(Th,P2);
 Vh u1o, u2o, v1, v2, u1, u2, du1, du2;
-
+Vh g=geps(x);
 
 fespace Qh(Th, P1);
 Qh p, q, dp, psi,phi;
-Qh g=gh(x);
+
 
 fespace Ph(Th, P0);
 Ph hh = hTriangle; //get the size of all triangles
@@ -64,13 +64,19 @@ macro Gradient(u) [dx(u),dy(u)] //
 macro div(u1,u2) (dx(u1) + dy(u2)) //
 macro UgradV(u1,u2,v1,v2) [ [u1,u2]'*[dx(v1),dy(v1)] , [u1,u2]'*[dx(v2),dy(v2)] ]//
 
+real meanp, meandp;
+
 macro NS() {
  int k;
  real err=0;
  Stokes;
+ meanp = int2d(Th)(p) / Th.area;
+ p = p - meanp;
 /* Newton Loop  */
  for(k=0; k< 15; k++) {
    LinNS;
+   meandp = int2d(Th)(dp) / Th.area;
+   dp = dp - meandp;
    du1[] = u1[] - u1o[];
    du2[] = u2[] - u2o[];
    err = sqrt(int2d(Th)(Gradient(du1)'*Gradient(du1)+Gradient(du2)'*Gradient(du2))) /
@@ -96,7 +102,7 @@ problem Stokes ([u1o, u2o, p],[v1, v2, q])
         + q*(div(u1o,u2o)))//-int2d(Th,qforder=2)(p*q)
         //+ int2d(Th)(p*q) 
      +on(1,2,4, u1o=0, u2o=0)
-     +on(3, u1o=g, u2o=0);
+     +on(3, u1o=1, u2o=0);
 
 problem LinNS([u1,u2,dp],[v1,v2,q]) = 
      int2d(Th)(nu*a(u1,u2,v1,v2)
@@ -106,9 +112,10 @@ problem LinNS([u1,u2,dp],[v1,v2,q]) =
         -int2d(Th)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])//-int2d(Th,qforder=2)(dp*q)
         //+ int2d(Th)(dp*q)
      +on(1,2,4, u1=0, u2=0)
-     +on(3, u1=g, u2=0);
+     +on(3, u1=1, u2=0);
 
 NS;
+
 
 //Save mesh
 savemesh(Th,"mesh_square.msh");
@@ -119,6 +126,8 @@ ffSaveVh(Th,Qh,"espacio_Qh.txt");
 ffSaveData(dp,"presion.txt");
 //Save a 2D vector field
 ffSaveData2(u1,u2,"solucion.txt");
+
+//plot(dp);
 
 //plot(u1,value=1,ps="componente_1.eps",cmm="Componente u_1",wait=1);
 //plot(u2,value=1,ps="componente_2.eps",cmm="Componente u_2",wait=1);
