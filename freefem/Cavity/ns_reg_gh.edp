@@ -8,7 +8,7 @@ real x1 = 1;
 real y0 = -1;
 real y1 = 1;
 
-int n1 = 128;
+int n1 = 64;
 int n2 = 2*n1;
 
 
@@ -34,7 +34,7 @@ func real gh1(real x){
 
 
 //Fespace
-fespace Vh1(Th1,P2);
+fespace Vh1(Th1,P1);
 Vh1 u1o, u2o, v1, v2, u1, u2, du1, du2;
 
 
@@ -78,8 +78,8 @@ problem Stokes1 ([u1o, u2o, p],[v1, v2, q])
     = int2d(Th1)(
         nu*a(u1o,u2o,v1,v2)
         - div(v1,v2)*p
-        + q*(div(u1o,u2o)))//-int2d(Th,qforder=2)(p*q)
-        //+ int2d(Th)(p*q) 
+        + q*(div(u1o,u2o)))-int2d(Th1,qforder=2)(p*q)
+        + int2d(Th1)(p*q) 
      +on(1,2,4, u1o=0, u2o=0)
      +on(3, u1o=g1, u2o=0);
 
@@ -88,8 +88,8 @@ problem LinNS1([u1,u2,dp],[v1,v2,q]) =
 	       + UgradV(u1,u2, u1o, u2o)'*[v1,v2]
 	       + UgradV(u1o,u2o,u1,u2)'*[v1,v2]
 	       + div(u1,u2)*q - div(v1,v2)*dp)
-        -int2d(Th1)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])//-int2d(Th,qforder=2)(dp*q)
-        //+ int2d(Th)(dp*q)
+        -int2d(Th1)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])-int2d(Th1,qforder=2)(dp*q)
+        + int2d(Th1)(dp*q)
      +on(1,2,4, u1=0, u2=0)
      +on(3, u1=g1, u2=0);
 
@@ -118,7 +118,7 @@ func real gh2(real x){
 
 
 //Fespace
-fespace Vh2(Th2,P2);
+fespace Vh2(Th2,P1);
 Vh2 uu1o, uu2o, vv1, vv2, uu1, uu2, duu1, duu2;
 
 
@@ -162,8 +162,8 @@ problem Stokes2 ([uu1o, uu2o, pp],[vv1, vv2, qq])
     = int2d(Th2)(
         nu*a(uu1o,uu2o,vv1,vv2)
         - div(vv1,vv2)*pp
-        + qq*(div(uu1o,uu2o)))//-int2d(Th,qforder=2)(p*q)
-        //+ int2d(Th)(p*q) 
+        + qq*(div(uu1o,uu2o)))-int2d(Th2,qforder=2)(pp*qq)
+        + int2d(Th2)(pp*qq) 
      +on(1,2,4, uu1o=0, uu2o=0)
      +on(3, uu1o=g2, uu2o=0);
 
@@ -172,8 +172,8 @@ problem LinNS2([uu1,uu2,dpp],[vv1,vv2,qq]) =
 	       + UgradV(uu1,uu2, uu1o, uu2o)'*[vv1,vv2]
 	       + UgradV(uu1o,uu2o,uu1,uu2)'*[vv1,vv2]
 	       + div(uu1,uu2)*qq - div(vv1,vv2)*dpp)
-        -int2d(Th2)(UgradV(uu1o,uu2o, uu1o, uu2o)'*[vv1,vv2])//-int2d(Th,qforder=2)(dp*q)
-        //+ int2d(Th)(dp*q)
+        -int2d(Th2)(UgradV(uu1o,uu2o, uu1o, uu2o)'*[vv1,vv2])-int2d(Th2,qforder=2)(dpp*qq)
+        + int2d(Th2)(dpp*qq)
      +on(1,2,4, uu1=0, uu2=0)
      +on(3, uu1=g2, uu2=0);
 
