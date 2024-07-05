@@ -1,7 +1,7 @@
 include "ffmatlib.idp"
 
 //Parametros
-int n = 64;
+int n = 24;
 real h=1./n;
 real nu = 1;
 real tol = 1e-9;
@@ -47,11 +47,11 @@ func real gh(real x){
 //Fespace
 fespace Vh(Th,P2);
 Vh u1o, u2o, v1, v2, u1, u2, du1, du2;
-Vh g=geps(x);
+
 
 fespace Qh(Th, P1);
 Qh p, q, dp, psi,phi;
-
+Qh g=gh(x);
 
 fespace Ph(Th, P0);
 Ph hh = hTriangle; //get the size of all triangles
@@ -131,7 +131,7 @@ ffSaveData2(u1,u2,"solucion.txt");
 
 //plot(u1,value=1,ps="componente_1.eps",cmm="Componente u_1",wait=1);
 //plot(u2,value=1,ps="componente_2.eps",cmm="Componente u_2",wait=1);
-//plot([u1,u2],value=1,ps="velocidad.eps",wait=1);
+plot([u1,u2],value=1,ps="velocidad.eps",cmm="Solucion u_h",wait=1);
 
 
 
