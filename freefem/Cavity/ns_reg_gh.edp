@@ -18,6 +18,11 @@ int n2 = 2*n1;
 real h1=1./n1;
 mesh Th1 = square(n1, n1, [x0+(x1-x0)*x, y0+(y1-y0)*y]);
 
+fespace Ph(Th1, P0);
+Ph hh1 = hTriangle; //get the size of all triangles
+
+real hmax1=hh1[].max;
+
 
 //Dato Dirichlet (interpolador de lagrange de g=1)
 func real gh1(real x){
@@ -34,7 +39,7 @@ func real gh1(real x){
 
 
 //Fespace
-fespace Vh1(Th1,P1);
+fespace Vh1(Th1,P2);
 Vh1 u1o, u2o, v1, v2, u1, u2, du1, du2;
 
 
@@ -58,8 +63,7 @@ macro NS1() {
    LinNS1;
    du1[] = u1[] - u1o[];
    du2[] = u2[] - u2o[];
-   err1 = sqrt(int2d(Th1)(Gradient(du1)'*Gradient(du1)+Gradient(du2)'*Gradient(du2))) /
-     sqrt(int2d(Th1)(Gradient(u1o)'*Gradient(u1o) + Gradient(u2o)'*Gradient(u2o)));
+   err1 = sqrt(sqrt(int2d(Th1)(du1^4+du2^4)));
    u1o[] = u1[];
    u2o[] = u2[];
    cout << "error = " << err1 << " / " << "tol = " << tol << endl;
@@ -78,8 +82,8 @@ problem Stokes1 ([u1o, u2o, p],[v1, v2, q])
     = int2d(Th1)(
         nu*a(u1o,u2o,v1,v2)
         - div(v1,v2)*p
-        + q*(div(u1o,u2o)))-int2d(Th1,qforder=2)(p*q)
-        + int2d(Th1)(p*q) 
+        + q*(div(u1o,u2o)))//-int2d(Th1,qforder=2)(p*q)
+        //+ int2d(Th1)(p*q) 
      +on(1,2,4, u1o=0, u2o=0)
      +on(3, u1o=g1, u2o=0);
 
@@ -102,6 +106,10 @@ NS1;
 real h2=1./n2;
 mesh Th2 = square(n2, n2, [x0+(x1-x0)*x, y0+(y1-y0)*y]);
 
+fespace Ph2(Th2, P0);
+Ph2 hh2 = hTriangle; //get the size of all triangles
+
+real hmax2=hh2[].max;
 
 //Dato Dirichlet (interpolador de lagrange de g=1)
 func real gh2(real x){
@@ -118,7 +126,7 @@ func real gh2(real x){
 
 
 //Fespace
-fespace Vh2(Th2,P1);
+fespace Vh2(Th2,P2);
 Vh2 uu1o, uu2o, vv1, vv2, uu1, uu2, duu1, duu2;
 
 
@@ -142,8 +150,7 @@ macro NS2() {
    LinNS2;
    duu1[] = uu1[] - uu1o[];
    duu2[] = uu2[] - uu2o[];
-   err2 = sqrt(int2d(Th2)(Gradient(duu1)'*Gradient(duu1)+Gradient(duu2)'*Gradient(duu2))) /
-     sqrt(int2d(Th2)(Gradient(uu1o)'*Gradient(uu1o) + Gradient(uu2o)'*Gradient(uu2o)));
+   err2 = sqrt(sqrt(int2d(Th2)(duu1^4+duu2^4)));
    uu1o[] = uu1[];
    uu2o[] = uu2[];
    cout << "error = " << err2 << " / " << "tol = " << tol << endl;
@@ -162,8 +169,8 @@ problem Stokes2 ([uu1o, uu2o, pp],[vv1, vv2, qq])
     = int2d(Th2)(
         nu*a(uu1o,uu2o,vv1,vv2)
         - div(vv1,vv2)*pp
-        + qq*(div(uu1o,uu2o)))-int2d(Th2,qforder=2)(pp*qq)
-        + int2d(Th2)(pp*qq) 
+        + qq*(div(uu1o,uu2o)))//-int2d(Th2,qforder=2)(pp*qq)
+        //+ int2d(Th2)(pp*qq) 
      +on(1,2,4, uu1o=0, uu2o=0)
      +on(3, uu1o=g2, uu2o=0);
 
@@ -186,7 +193,8 @@ cout << endl;
 cout << "Resultados:" << endl;
 cout << "--------------------------" << endl;
 cout << "errorL4: " << errorL4 << endl;
-cout << "h_max: " << h2 << endl;
+cout << "h_max1: " << hmax1 << endl;
+cout << "h_max2: " << hmax2 << endl;
 
 cout << endl;
 cout << "NbBoundaryElements:\t" <<  Th2.nbe << endl;

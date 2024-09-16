@@ -1,7 +1,8 @@
 include "ffmatlib.idp"
+load "iovtk"
 
 //Parametros
-int n = 24;
+int n = 64;
 real h=1./n;
 real nu = 1;
 real tol = 1e-9;
@@ -13,7 +14,14 @@ real x0 = -1;
 real x1 = 1;
 real y0 = -1;
 real y1 = 1;
-mesh Th = square(n, n, [x0+(x1-x0)*x, y0+(y1-y0)*y]);
+
+border a(t=-1.0,1.0){x=t; y=-1; label=1;};
+border b(t=-1.0,1.0){x=1; y=t; label=2;};
+border c(t=1.0,-1.0){x=t; y=1; label=3;};
+border d(t=1.0,-1.0){x=-1; y=t; label=4;};
+mesh Th = buildmesh (a(n) + b(n) + c(n) +d(n));
+
+//mesh Th = square(n, n, [x0+(x1-x0)*x, y0+(y1-y0)*y]);
 
 func real sigma(real x){
   if(-1<=x && x<=-0.5){
@@ -102,7 +110,7 @@ problem Stokes ([u1o, u2o, p],[v1, v2, q])
         + q*(div(u1o,u2o)))//-int2d(Th,qforder=2)(p*q)
         //+ int2d(Th)(p*q) 
      +on(1,2,4, u1o=0, u2o=0)
-     +on(3, u1o=1, u2o=0);
+     +on(3, u1o=g, u2o=0);
 
 problem LinNS([u1,u2,dp],[v1,v2,q]) = 
      int2d(Th)(nu*a(u1,u2,v1,v2)
@@ -112,10 +120,11 @@ problem LinNS([u1,u2,dp],[v1,v2,q]) =
         -int2d(Th)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])//-int2d(Th,qforder=2)(dp*q)
         //+ int2d(Th)(dp*q)
      +on(1,2,4, u1=0, u2=0)
-     +on(3, u1=1, u2=0);
+     +on(3, u1=g, u2=0);
 
 NS;
 
+cout << "h_max = " << hmax << endl;
 
 //Save mesh
 savemesh(Th,"mesh_square.msh");
@@ -129,11 +138,11 @@ ffSaveData2(u1,u2,"solucion.txt");
 
 //plot(dp);
 
-//plot(u1,value=1,ps="componente_1.eps",cmm="Componente u_1",wait=1);
+plot(Th,wait=1);
+//plot(dp);
+plot(u1,value=1,ps="componente_1.eps",cmm="Componente u_1",wait=1);
 //plot(u2,value=1,ps="componente_2.eps",cmm="Componente u_2",wait=1);
-plot([u1,u2],value=1,ps="velocidad.eps",cmm="Solucion u_h",wait=1);
-
-
+//plot([u1,u2],value=true,ps="velocidad.eps",fill=true,wait=1);
 
 
 
