@@ -11,7 +11,6 @@ real y1 = 1;
 int n1 = 64;
 int n2 = 2*n1;
 
-
 //Problema Malla 1//
 
 // Mesh
@@ -63,7 +62,8 @@ macro NS1() {
    LinNS1;
    du1[] = u1[] - u1o[];
    du2[] = u2[] - u2o[];
-   err1 = sqrt(sqrt(int2d(Th1)(du1^4+du2^4)));
+   err1 = sqrt(int2d(Th1)(Gradient(du1)'*Gradient(du1)+Gradient(du2)'*Gradient(du2))) /
+     sqrt(int2d(Th1)(Gradient(u1)'*Gradient(u1) + Gradient(u2)'*Gradient(u2)));
    u1o[] = u1[];
    u2o[] = u2[];
    cout << "error = " << err1 << " / " << "tol = " << tol << endl;
@@ -92,8 +92,8 @@ problem LinNS1([u1,u2,dp],[v1,v2,q]) =
 	       + UgradV(u1,u2, u1o, u2o)'*[v1,v2]
 	       + UgradV(u1o,u2o,u1,u2)'*[v1,v2]
 	       + div(u1,u2)*q - div(v1,v2)*dp)
-        -int2d(Th1)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])-int2d(Th1,qforder=2)(dp*q)
-        + int2d(Th1)(dp*q)
+        -int2d(Th1)(UgradV(u1o,u2o, u1o, u2o)'*[v1,v2])//-int2d(Th1,qforder=2)(dp*q)
+        //+ int2d(Th1)(dp*q)
      +on(1,2,4, u1=0, u2=0)
      +on(3, u1=g1, u2=0);
 
@@ -150,7 +150,8 @@ macro NS2() {
    LinNS2;
    duu1[] = uu1[] - uu1o[];
    duu2[] = uu2[] - uu2o[];
-   err2 = sqrt(sqrt(int2d(Th2)(duu1^4+duu2^4)));
+   err2 = sqrt(int2d(Th2)(Gradient(duu1)'*Gradient(duu1)+Gradient(duu2)'*Gradient(duu2))) /
+     sqrt(int2d(Th2)(Gradient(uu1)'*Gradient(uu1) + Gradient(uu2)'*Gradient(uu2)));
    uu1o[] = uu1[];
    uu2o[] = uu2[];
    cout << "error = " << err2 << " / " << "tol = " << tol << endl;
@@ -179,8 +180,8 @@ problem LinNS2([uu1,uu2,dpp],[vv1,vv2,qq]) =
 	       + UgradV(uu1,uu2, uu1o, uu2o)'*[vv1,vv2]
 	       + UgradV(uu1o,uu2o,uu1,uu2)'*[vv1,vv2]
 	       + div(uu1,uu2)*qq - div(vv1,vv2)*dpp)
-        -int2d(Th2)(UgradV(uu1o,uu2o, uu1o, uu2o)'*[vv1,vv2])-int2d(Th2,qforder=2)(dpp*qq)
-        + int2d(Th2)(dpp*qq)
+        -int2d(Th2)(UgradV(uu1o,uu2o, uu1o, uu2o)'*[vv1,vv2])//-int2d(Th2,qforder=2)(dpp*qq)
+        //+ int2d(Th2)(dpp*qq)
      +on(1,2,4, uu1=0, uu2=0)
      +on(3, uu1=g2, uu2=0);
 
@@ -193,12 +194,12 @@ cout << endl;
 cout << "Resultados:" << endl;
 cout << "--------------------------" << endl;
 cout << "errorL4: " << errorL4 << endl;
-cout << "h_max1: " << hmax1 << endl;
-cout << "h_max2: " << hmax2 << endl;
+//cout << "h_max1: " << hmax1 << endl;
+//cout << "h_max2: " << hmax2 << endl;
 
 cout << endl;
-cout << "NbBoundaryElements:\t" <<  Th2.nbe << endl;
-cout << "NbTriangles:\t\t" <<  Th2.nt << endl;
+//cout << "NbBoundaryElements:\t" <<  Th2.nbe << endl;
+//cout << "NbTriangles:\t\t" <<  Th2.nt << endl;
 cout << "NbVertices:\t\t" <<  Th2.nv << endl;
 
 /////////////////////////////////////////////////////////////
